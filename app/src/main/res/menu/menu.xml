@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_add_account"
+        android:title="Add Account"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_get_item"
+        android:title="Get Item"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_show"
+        android:title="Show"
+        app:showAsAction="always"
+        android:visible="false" />
+
+</menu>
