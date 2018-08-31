@@ -2,17 +2,14 @@ package tw.broccolihuang.mcdonaldscoupons
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.support.v7.app.AlertDialog
 import android.text.TextUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import com.google.gson.Gson
 import io.reactivex.rxkotlin.subscribeBy
 import tw.broccolihuang.mcdonaldscoupons.firestore.Config
 import tw.broccolihuang.mcdonaldscoupons.api.getCouponList.GetCouponList
@@ -20,6 +17,7 @@ import tw.broccolihuang.mcdonaldscoupons.api.getItem.GetItem
 import tw.broccolihuang.mcdonaldscoupons.api.getStickerList.GetStickerList
 import tw.broccolihuang.mcdonaldscoupons.firestore.Account
 import tw.broccolihuang.mcdonaldscoupons.firestore.FireStore
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
     lateinit var tvShow: TextView
@@ -32,10 +30,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        subscribeTopic("all")
+
         tvShow = findViewById(R.id.tv_show)
 
         fireStore = FireStore()
-
         fireStore.getConfig(object : FireStore.Callback {
             override fun <T> onSuccess(obj: T) {
                 config = obj as Config
@@ -66,11 +65,12 @@ class MainActivity : AppCompatActivity() {
                         .setView(dialogAddAccount)
                         .setTitle("Add account")
                         .setPositiveButton("Submit", {dialog, whichButton ->
-                            var account = Account()
-                            account.access_token = (dialogAddAccount.findViewById(R.id.et_access_token) as EditText).text.toString()
-                            account.account = (dialogAddAccount.findViewById(R.id.et_account) as EditText).text.toString()
-                            account.password = (dialogAddAccount.findViewById(R.id.et_password) as EditText).text.toString()
-                            account.name = (dialogAddAccount.findViewById(R.id.et_name) as EditText).text.toString()
+                            var account = Account(
+                                    (dialogAddAccount.findViewById(R.id.et_access_token) as EditText).text.toString(),
+                                    (dialogAddAccount.findViewById(R.id.et_account) as EditText).text.toString(),
+                                    (dialogAddAccount.findViewById(R.id.et_password) as EditText).text.toString(),
+                                    (dialogAddAccount.findViewById(R.id.et_name) as EditText).text.toString()
+                            )
                             fireStore.addAccount(account, object : FireStore.Callback {
                                 override fun <T> onSuccess(obj: T) {
                                     Toast.makeText(this@MainActivity, "Finish", Toast.LENGTH_SHORT).show()
@@ -141,5 +141,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    fun subscribeTopic(topic: String) {
+        FirebaseMessaging.getInstance().subscribeToTopic(topic)
     }
 }
