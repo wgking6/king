@@ -18,6 +18,8 @@ import tw.broccolihuang.mcdonaldscoupons.api.getStickerList.GetStickerList
 import tw.broccolihuang.mcdonaldscoupons.firestore.Account
 import tw.broccolihuang.mcdonaldscoupons.firestore.FireStore
 import com.google.firebase.messaging.FirebaseMessaging
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var tvShow: TextView
@@ -82,27 +84,27 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
             R.id.menu_get_item -> {
-                tvShow.text = ""
-                for (account in accounts){
-                    GetItem().load(config, account.access_token)
-                            ?.subscribeBy(
-                                    onNext = {
-                                        for (coupon in it.results.coupons){
-                                            tvShow.text = tvShow.text.toString() + coupon.object_info.title + "\n"
-                                        }
-                                    },
-                                    onError = {println(it.message)}
-                            )
-                }
+//                tvShow.text = ""
+//                for (account in accounts){
+//                    GetItem().load(config, account.access_token)
+//                            ?.subscribeBy(
+//                                    onNext = {
+//                                        for (coupon in it.results.coupons){
+//                                            tvShow.text = tvShow.text.toString() + coupon.object_info.title + "\n"
+//                                        }
+//                                    },
+//                                    onError = {println(it.message)}
+//                            )
+//                }
                 return true
             }
             R.id.menu_show -> {
                 tvShow.text = ""
                 for (account in accounts){
                     if (TextUtils.isEmpty(account.password)) {
-                        tvShow.text = tvShow.text.toString() + account.account + " | 密碼問" + account.name + "\n"
+                        tvShow.text = tvShow.text.toString() + account.account + " | 密碼問" + account.name + "\n\n"
                     } else {
-                        tvShow.text = tvShow.text.toString() + account.account + " | " + account.password + "\n"
+                        tvShow.text = tvShow.text.toString() + account.account + " | " + account.password + "\n\n"
                     }
                 }
 
@@ -132,7 +134,13 @@ class MainActivity : AppCompatActivity() {
                     GetStickerList().load(config, account.access_token)
                             ?.subscribeBy(
                                     onNext = {
-                                        tvShow.text = tvShow.text.substring(0, tvShow.text.indexOf("\n", tvShow.text.indexOf(account.account))) + " (" + it.results.stickers.size + "點):" + tvShow.text.substring(tvShow.text.indexOf("\n", tvShow.text.indexOf(account.account)))
+                                        var expireSticker = 0
+                                        for (sticker in it.results.stickers) {
+                                            if (sticker.object_info.expire_datetime.contains(SimpleDateFormat("yyyy/MM").format(Date()))) {
+                                                expireSticker++
+                                            }
+                                        }
+                                        tvShow.text = tvShow.text.substring(0, tvShow.text.indexOf("\n", tvShow.text.indexOf(account.account))) + " (" + it.results.stickers.size + "點  月底到期:" + expireSticker + "點):" + tvShow.text.substring(tvShow.text.indexOf("\n", tvShow.text.indexOf(account.account)))
                                     },
                                     onError = {println(it.message)}
                             )
